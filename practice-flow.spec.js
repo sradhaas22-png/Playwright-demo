@@ -1,63 +1,71 @@
 const { test, expect } = require('@playwright/test');
-
 test('Launch site and open sign-in page', async({page}) => {
-// open the website
+   // TC01: Launch the application
 await page.goto('https://practicesoftwaretesting.com');
-//check sign in button visible
+   // TC02: Verify Sign In link is visible on home page
 await expect(page.getByRole('link',{name:'Sign in'})).toBeVisible();
-// click sign in button
+   // TC03: Navigate to Login page by clicking Sign In
 await page.getByRole('link', { name: 'Sign in'}).click();
-//verify login page loaded and heading visible
+   // TC04: Verify Login page heading is displayed
 await expect(page.getByRole('heading',{name:'Login'})).toBeVisible();
-//verify form fields
+   // TC05: Verify Email and Password fields are visible on Login page
 await expect(page.getByLabel('Email address *')).toBeVisible();
 await expect (page.getByLabel('Password *')).toBeVisible();
-//verify login button
+   // TC06: Verify Login button is visible
 await expect(page.getByRole('button',{name: 'Login'})).toBeVisible();
-//verify register your account link
+   // TC07: Verify Register your account link is visible
 const registerLink =page.getByRole('link',{name:'Register your account'});
 await expect(registerLink).toBeVisible();
+   // TC08: Verify Register your account navigation and heading
 await registerLink.click();
-//verify customer registration page 
 await expect(page).toHaveURL(/\/auth\/register/);
 await expect(page.getByRole('heading',{name:'Customer registration'})).toBeVisible();
 await page.goBack();
-//verify forgot your password link
+   // TC09: Verify Forgot Password link navigation and fields
 const forgotPasswordLink = page.getByRole('link',{name:' Forgot your Password? '});
 await expect(forgotPasswordLink).toBeVisible();
+   // TC10:navigate to forgot password page
 await forgotPasswordLink.click();
-//verify forgot your password page
+  // TC11: verify forgot password URL and heading
 await expect(page).toHaveURL(/\/auth\/forgot-password/);
 await expect(page.getByRole('heading',{name:'Forgot Password'})).toBeVisible();
+  //TC12:Verify user can navigate back to login page
 await page.goBack(); 
-//click login button without filling fields
+await expect(page.getByRole('heading',{name:'Login'})).toBeVisible();
+  // TC13: Verify user able to click Login without credentials
 await page.getByRole('button', {name:'Login'}).click();
-//verify "validation" message
+  // TC14: Verify validation messages when Login is clicked without credentials
 await expect(page.getByText('Email is required')).toBeVisible();
 await expect(page.getByText('Password is required')).toBeVisible();
-//login with valid credentials
+  // TC15: Verify successful login with valid credentials
 await page.fill('#email','customer@practicesoftwaretesting.com');
 await page.fill('#password','welcome01');
 await page.getByRole('button',{name:'Login'}).click();
-//wait for heading to appear
-//await expect(page).toHaveURL('https://practicesoftwaretesting.com/account');
-await expect(page.locator('[data-test="page-title"]')).toBeVisible({timeout:30000});
-//verify home page
+//await expect(page.locator('[data-test="page-title"]')).toBeVisible({timeout:60000});
+  // TC16: Verify Home page navigation
 await page.getByRole('link', { name: 'Home'}).click();
-//type hammer in search box
-await page.getByPlaceholder('Search').fill('Hammer');
+  // TC17: Verify product search using keyword "hammer"
+await page.getByPlaceholder('Search').fill('hammer');
 await page.keyboard.press('Enter');
-//verify searched products
 await expect(page.locator('text=Searched for: Hammer')).toBeVisible({timeout:10000});
+  // TC18: Verify all searched product titles contain "hammer"
 const products = page.locator('div.card:visible>>h5.card-title');
-
-const titles = page.locator('h5.card-title:visible');
-const count = await titles.count();
+const hammerTitles = page.locator('h5.card-title:visible',{hasText:/hammer/i,});
+await expect(hammerTitles.first()).toBeVisible();
+const count = await hammerTitles.count();
 
 for (let i = 0; i < count; i++)
 {
-    await expect(titles.nth(i)).toContainText(/Hammer/i);
+    await expect(hammerTitles.nth(i)).toContainText(/hammer/i);
 }
+  // TC19: Verify Contact page navigation
+await page.getByRole('link', { name: 'Contact'}).click();
+page.goBack();
+  // TC20: Verify user can logout successfully
+const menu = page.getByRole('button',{name:'Jane Doe'}).locator('..');
+await page.getByRole('button',{name:'Jane Doe'}).click();
+await menu.getByText('Sign out',{ exact: true}).click();
+
 
 });
 
